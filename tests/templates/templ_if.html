@@ -1,0 +1,9 @@
+<p>Welcome, {{user.name}}!</p>
+
+{{% if user.is_logged_in %}}
+<p>Role: <strong>{{user.role}}</strong></p>
+You have logged in!
+
+{{% endif %}}
+
+<b>{{user.alias}}</b>

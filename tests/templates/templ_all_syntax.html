@@ -1,0 +1,12 @@
+<p>Welcome, {{user.name}}!</p>
+<b>{{user.alias}}</b>
+
+<p>Your Products:</p>
+<ul>
+    {% if user.is_logged_in %}
+        {% for product in product_list %}
+            <li>{{ product.name }}:{{ product.price|format_price }}</li>
+        {% endfor %}
+    {% else %}
+    <li>You haven't login and cannot see your products</li>
+    {% endif %}

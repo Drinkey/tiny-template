@@ -11,7 +11,15 @@ The core idea is to translate the template language into Python3 code and evalua
 
 The supported template language is a nano subset of Django according to `500lines`.
 
-For this project, we support following snippet of templating and that's all.
+For this project, we support following syntax:
+
+- variable property accessing with dot, e.g. `var.property`
+- loops: `{{% for var in iterable %}} ... {{% endfor %}}`
+- condition: `{{% if var %}} ... {{% endif %}}`
+- comment: `{# this is comment and will not be evaluated #}`
+- function call: `var|function_call` (only one parameter)
+
+A snippet of the template
 
 ```html
 <p>Welcome, {{user_name}}!</p>
@@ -24,6 +32,7 @@ For this project, we support following snippet of templating and that's all.
 {% endfor %}
 </ul>
 ```
+> The snippet may not reasonable but shows the general ideas.
 
 And to generate the output, we would call the render function like the following:
 ```python
