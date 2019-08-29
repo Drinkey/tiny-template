@@ -1,10 +1,10 @@
 import pytest
 import tinytemplate
 
-def test_template_sigle_var_eval():
+def test_template_s_tokenize_templ():
     template_file = './templates/templ_var_eval.html'
     user_name = "Junkai Zhang"
     templ = tinytemplate.TinyTemplate()
-    output = templ.render(template_file, user_name)
-
-    assert f"{user_name}" in output
+    output = templ._tokenize_templ(template_file)
+    print(output)
+    assert "{{ user_name }}" in output and isinstance(output, list)
