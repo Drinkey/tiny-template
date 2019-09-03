@@ -27,3 +27,8 @@ class CodeBuilder:
 
     def add_section(self, codeblock):
         pass
+
+    def get_globals(self):
+        code_globals = dict()
+        exec(str(self), code_globals)
+        return code_globals
