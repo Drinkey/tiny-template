@@ -10,6 +10,7 @@ COMMENT = "{#"
 # TODO: this one should be configurable
 INDENT_STEP = 4
 
+
 class CodeBuilder:
     """Generate Python code
     """
@@ -39,8 +40,11 @@ class CodeBuilder:
 
     def get_globals(self):
         code_globals = dict()
-        exec(str(self), code_globals)
+        source_code = str(self)
+        print(source_code)
+        exec(source_code, code_globals)
         return code_globals
+
 
 def do_dot(var, prop):
     try:
@@ -48,12 +52,13 @@ def do_dot(var, prop):
     except KeyError:
         return var[prop]
 
+
 def dummy_function(*args):
     return 0
 
+
 class TinyTemplate:
     def __init__(self, tepmplate, *contexts):
-        
         self.template = tepmplate
         self.all_variables = set()
         self.loop_vars = set()
@@ -63,23 +68,6 @@ class TinyTemplate:
         for context in contexts:
             self.context.update(context)
 
-    def _tokenize_templ(self):
-        content = ''
-        with open(self.template, 'r') as fp:
-            content = fp.read()
-        return re.split(TOKENPATTERN, content)
-    
-    def _expr_code(self, expr):
-        self._variables(expr)
-        code = f"c_{expr}"
-        return code
-
-    def _variables(self, var_name):
-        # TODO: if var_name is a valid variable name?
-        self.all_variables.add(var_name)
-        
-
-    def compiler(self):
         _code = CodeBuilder()
 
         _code.add_line("def render_code(context):")
@@ -91,6 +79,7 @@ class TinyTemplate:
         _code.add_line("to_str = str")
 
         buffer = list()
+
         def flush_output():
             if len(buffer) == 1:
                 _code.add_line(f"append_result['{buffer[0]}']")
@@ -111,12 +100,28 @@ class TinyTemplate:
                     buffer.append(repr(token))
         flush_output()
 
-        vars_code.add_line('print("Im ok")')
+        vars_code.add_line('print("are you ok")')
 
         _code.add_line("result_str = ''.join(result)")
         _code.add_line("return result_str")
-        
-        return _code.code
+
+        code_globals = _code.get_globals()
+        self.render_code = code_globals['render_code']
+
+    def _tokenize_templ(self):
+        content = ''
+        with open(self.template, 'r') as fp:
+            content = fp.read()
+        return re.split(TOKENPATTERN, content)
+
+    def _expr_code(self, expr):
+        self._variables(expr)
+        code = f"c_{expr}"
+        return code
+
+    def _variables(self, var_name):
+        # TODO: if var_name is a valid variable name?
+        self.all_variables.add(var_name)
 
     def render(self, context=None):
         render_context = self.context

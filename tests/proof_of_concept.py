@@ -1,10 +1,12 @@
 import pytest
 
+
 def read_template(templ_file):
     content = ''
     with open(templ_file, 'r') as fp:
         content = fp.read()
     return content
+
 
 def do_dot(var, prop):
     try:
@@ -12,16 +14,27 @@ def do_dot(var, prop):
     except KeyError:
         return var[prop]
 
+
 context = {
     'title': 'Software Engineering',
     'author_name': 'Junkai Zhang',
     'content': [
-        {'header': 'Definition', 'content': 'develop a software\n- option 1\n- option 2'},
-        {'header': 'Engineering Method', 'content': "do a job"},
-        {'header': 'Workflow', 'content': 'show a chart'}
+        {
+            'header': 'Definition',
+            'content': 'develop a software\n- option 1\n- option 2'
+        },
+        {
+            'header': 'Engineering Method',
+            'content': "do a job"
+        },
+        {
+            'header': 'Workflow',
+            'content': 'show a chart'
+        }
     ],
     'formater': int
 }
+
 
 templ_str = """
 # {{title}}
@@ -36,6 +49,7 @@ templ_str = """
 {% endfor %}
 
 """
+
 
 def test_variable_evaluation():
     template_file = './templates/templ_var_eval.html'

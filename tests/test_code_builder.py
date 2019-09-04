@@ -6,6 +6,7 @@ import pytest
 def setup_function():
     pass
 
+
 codesource = """
 import re
 import os
@@ -17,6 +18,7 @@ def func_1():
     return 1
 
 """
+
 
 def test_compiler_add_multiple_lines():
     code_line = [
@@ -42,8 +44,8 @@ def func_1():
     codebuilder.add_line(code_line[4])
     assert str(codebuilder) == expected
 
-def test_compiler_get_globals():
 
+def test_compiler_get_globals():
     codebuilder = tinytemplate.CodeBuilder()
     for code in codesource.split('\n'):
         codebuilder.add_line(code)
@@ -52,6 +54,7 @@ def test_compiler_get_globals():
     assert 'var1' in g and g['var1'] == 123
     assert 'func_1' in g
     assert 'var_str' in g and g['var_str'] == 'unittest'
+
 
 def test_builder_add_section():
     code = tinytemplate.CodeBuilder()
