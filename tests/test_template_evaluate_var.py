@@ -71,3 +71,20 @@ def test_template_access_properties_with_dots_two_dots():
     print(output)
     print()
     assert 'fly' in output
+
+def test_template_if_statement():
+    template_file = f'{str(TEMPLATE_DIR)}/templates/templ_if.html'
+    context = {
+        'user':{
+            'name': 'Clark Kent',
+            'role': 'Justice Leaguage',
+            'alias': 'Super Man',
+            'is_logged_in': False
+        }
+    }
+    templ = tinytemplate.TinyTemplate(template_file)
+    output = templ.render(context)
+    print()
+    print(output)
+    print()
+    assert 'Justice Leaguage' not in output
