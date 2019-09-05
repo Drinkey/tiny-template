@@ -93,8 +93,8 @@ class TinyTemplate:
         if pathlib.PurePath(template).is_absolute():
             self.template = template
         
-        self.all_variables = set()
-        self.loop_vars = set()
+        self._all_variables = set()
+        self._loop_variables = set()
         self.dot_vars = set()
         self.render_code = dummy_function
 
@@ -137,23 +137,33 @@ class TinyTemplate:
                 op, *expressions = token[2:-2].split()
                 if op == 'if':
                     if len(expressions) == 0:
-                        raise SyntaxError("Unknown syntax for if expression")
+                        raise SyntaxError(f"Unknown syntax: if expression: `if {' '.join(expressions)}`")
                     print(f"expressions={expressions}")
                     expr = self._expr_code(' '.join(expressions))
                     ops_stack.append('if')
                     _code.add_line(f"if {expr}:")
                     _code.indent()
                 elif op == 'for':
-                    flush_output()
-                    raise NotImplementedError
+                    if len(expressions) < 3 or expressions[1] != 'in':
+                        raise SyntaxError(f"Unknown syntax: for expression: `if {' '.join(expressions)}`")
+                    print(f"expressions={expressions}")
+
+                    loop_var, _, iter_var = expressions
+                    self._add_loop_variables(loop_var)
+                    # expr = self._expr_code(' '.join(expressions))
+                    ops_stack.append('for')
+                    _code.add_line(f"for c_{loop_var} in {self._expr_code(iter_var)}:")
+                    _code.indent()
                 elif op.startswith('end'):
+                    end_op = op[3:]
                     print(f'current op stack:{ops_stack}')
+                    print(f"ending op: {end_op}")
                     _code.dedent()
             else:
                 if token:
                     buffer.append(repr(token))
         flush_output()
-        for var_name in self.all_variables:
+        for var_name in self._all_variables - self._loop_variables:
             vars_code.add_line(f'c_{var_name} = context["{var_name}"]')
 
         _code.add_line("result_str = ''.join(result)")
@@ -163,7 +173,7 @@ class TinyTemplate:
 
     def _tokenize_templ(self):
         content = ''
-        with open(self.template, 'r') as fp:
+        with open(self.template) as fp:
             content = fp.read()
         return re.split(TOKENPATTERN, content)
 
@@ -172,7 +182,6 @@ class TinyTemplate:
         if '.' in expr:
             var, *property_ = expr.split('.')
             code = self._expr_code(var)
-            self._add_dot_variables(code)
             args = ", ".join(repr(d) for d in property_)
             code = f"parser(c_{var}, {args})"
             print(code)
@@ -184,10 +193,10 @@ class TinyTemplate:
 
     def _add_all_variables(self, var_name):
         # TODO: if var_name is a valid variable name?
-        self.all_variables.add(var_name)
-    
-    def _add_dot_variables(self, var_name):
-        self.dot_vars.add(var_name)
+        self._all_variables.add(var_name)
+
+    def _add_loop_variables(self, var_name):
+        self._loop_variables.add(var_name)
 
     def render(self, context=None):
         render_context = self.context

@@ -3,7 +3,7 @@ import pytest
 
 def read_template(templ_file):
     content = ''
-    with open(templ_file, 'r') as fp:
+    with open(templ_file) as fp:
         content = fp.read()
     return content
 
