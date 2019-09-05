@@ -1,18 +1,37 @@
-import pytest
+import pathlib
 import tinytemplate
 
+
+TEMPLATE_DIR = pathlib.Path(__file__).resolve().parent
+
 def test_template_s_tokenize_templ():
-    template_file = './templates/templ_var_eval.html'
-    user_name = "Junkai Zhang"
-    templ = tinytemplate.TinyTemplate()
-    output = templ._tokenize_templ(template_file)
+    template_file = f'{str(TEMPLATE_DIR)}/templates/templ_var_eval.html'
+    templ = tinytemplate.TinyTemplate(template_file)
+    output = templ._tokenize_templ()
     print(output)
     assert "{{ user_name }}" in output and isinstance(output, list)
 
-def test_template_variable_evaluation():
-    template_file = './templates/templ_var_eval.html'
-    user_name = "Junkai Zhang"
-    templ = tinytemplate.TinyTemplate()
-    output = templ.render(template_file, user_name)
+
+def test_template_variable_evaluation_compiler():
+    template_file = f'{str(TEMPLATE_DIR)}/templates/templ_var_eval.html'
+    # user_name = "Junkai Zhang"
+    templ = tinytemplate.TinyTemplate(template_file)
+    output = templ.compiler()
+    output_str = ''.join(str(s) for s in output.code)
+    print()
+    print(output_str)
+    print()
+    # var name in template file should be resolve as new name with c_ prefix
+    assert "c_user_name" in output_str and "c_user_name =" in output_str
+
+
+def test_template_variable_evaluation_render():
+    template_file = f'{str(TEMPLATE_DIR)}/templates/templ_var_eval.html'
+    context = dict()
+    context['user_name'] = "Junkai Zhang"
+    templ = tinytemplate.TinyTemplate(template_file)
+    output = templ.render(context)
+    print()
     print(output)
-    assert user_name in output
+    print()
+    assert "Junkai Zhang" in output
