@@ -46,10 +46,11 @@ output = render(templ, user_name, product_list)
 0. `[DONE]` PoC, try to understand the concept with simple code
 1. `[DONE]` Support variable evaluation with out dots
 2. `[DONE]` Support variable evaluation with one or two dots
-3. `[DONE]` Support if statement
-4. **[TODO]** Support for statement
-5. **[TODO]** Support filters with pipes, multiple pipes
-6. **[TODO]** Refactoring all codes
+3. `[DONE]` Support `if` statement
+4. **[TODO]** Support `for` statement
+5. **[TODO]** Support nested `for` and `if` statements
+6. **[TODO]** Support filters with pipes, multiple pipes
+7. **[TODO]** Refactoring all codes
 
 # Principles
 

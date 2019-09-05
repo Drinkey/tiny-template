@@ -1,6 +1,6 @@
-<p>Welcome, {{ user_name }}!</p>
+<p>Welcome, {{ user.name }}!</p>
 <p>Products:</p>
 <ul>
 {% for product in product_list %}
-    <li>{{ product.name }}:{{ product.price|format_price }}</li>
+    <li><strong>{{ product.name }}</strong> : {{ product.price }} $</li>
 {% endfor %}

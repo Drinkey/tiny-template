@@ -88,3 +88,33 @@ def test_template_if_statement():
     print(output)
     print()
     assert 'Justice Leaguage' not in output
+
+def test_template_for_statement():
+    template_file = f'{str(TEMPLATE_DIR)}/templates/templ_for.html'
+    context = {
+        'user':{
+            'name': 'Clark Kent',
+            'role': 'Justice Leaguage',
+            'alias': 'Super Man',
+            'is_logged_in': False
+        },
+        'product_list': [
+            {
+                'name': "spacecraft",
+                'price': 100
+            },
+            {
+                'name': 'fortress',
+                'price': 10000
+            }
+        ]
+    }
+    templ = tinytemplate.TinyTemplate(template_file)
+    output = templ.render(context)
+    print()
+    print(output)
+    print()
+    assert 'spacecraft' in output
+    assert 'fortress' in output
+    assert 'Clark Kent' in output
+
