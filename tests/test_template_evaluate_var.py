@@ -14,7 +14,7 @@ def test_template_variable_evaluation_compiler():
     # user_name = "Junkai Zhang"
     templ = tinytemplate.TinyTemplate(template_file)
     output = templ.compiler()
-    output_str = ''.join(str(s) for s in output)
+    output_str = ''.join(str(s) for s in output.code)
     print()
     print(output_str)
     print()
@@ -23,10 +23,10 @@ def test_template_variable_evaluation_compiler():
 
 def test_template_variable_evaluation_render():
     template_file = './templates/templ_var_eval.html'
-    # user_name = "Junkai Zhang"
+    context = dict()
+    context['user_name'] = "Junkai Zhang"
     templ = tinytemplate.TinyTemplate(template_file)
-    output = templ.render()
-    output_str = ''.join(str(s) for s in output)
+    output = templ.render(context)
     print()
-    print(output_str)
+    print(output)
     print()

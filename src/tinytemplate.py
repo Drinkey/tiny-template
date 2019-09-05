@@ -68,6 +68,7 @@ class TinyTemplate:
         for context in contexts:
             self.context.update(context)
 
+    def compiler(self):
         _code = CodeBuilder()
 
         _code.add_line("def render_code(context):")
@@ -99,14 +100,15 @@ class TinyTemplate:
                 if token:
                     buffer.append(repr(token))
         flush_output()
-
-        vars_code.add_line('print("are you ok")')
+        for var_name in self.all_variables:
+            vars_code.add_line(f'c_{var_name} = context["{var_name}"]')
 
         _code.add_line("result_str = ''.join(result)")
         _code.add_line("return result_str")
 
-        code_globals = _code.get_globals()
-        self.render_code = code_globals['render_code']
+        # code_globals = _code.get_globals()
+        # self.render_code = code_globals['render_code']
+        return _code
 
     def _tokenize_templ(self):
         content = ''
@@ -127,4 +129,9 @@ class TinyTemplate:
         render_context = self.context
         if context:
             self.context.update(context)
+        codeobj = self.compiler()
+        source_code = ''.join(str(s) for s in codeobj.code)
+        source_code_globals = dict()
+        exec(source_code, source_code_globals)
+        self.render_code = source_code_globals['render_code']
         return self.render_code(render_context)
