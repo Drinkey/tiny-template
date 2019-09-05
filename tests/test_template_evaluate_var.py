@@ -1,8 +1,11 @@
+import pathlib
 import tinytemplate
 
 
+TEMPLATE_DIR = pathlib.Path(__file__).resolve().parent
+
 def test_template_s_tokenize_templ():
-    template_file = './templates/templ_var_eval.html'
+    template_file = f'{str(TEMPLATE_DIR)}/templates/templ_var_eval.html'
     templ = tinytemplate.TinyTemplate(template_file)
     output = templ._tokenize_templ()
     print(output)
@@ -10,7 +13,7 @@ def test_template_s_tokenize_templ():
 
 
 def test_template_variable_evaluation_compiler():
-    template_file = './templates/templ_var_eval.html'
+    template_file = f'{str(TEMPLATE_DIR)}/templates/templ_var_eval.html'
     # user_name = "Junkai Zhang"
     templ = tinytemplate.TinyTemplate(template_file)
     output = templ.compiler()
@@ -18,11 +21,12 @@ def test_template_variable_evaluation_compiler():
     print()
     print(output_str)
     print()
-    # assert user_name in output
+    # var name in template file should be resolve as new name with c_ prefix
+    assert "c_user_name" in output_str and "c_user_name =" in output_str
 
 
 def test_template_variable_evaluation_render():
-    template_file = './templates/templ_var_eval.html'
+    template_file = f'{str(TEMPLATE_DIR)}/templates/templ_var_eval.html'
     context = dict()
     context['user_name'] = "Junkai Zhang"
     templ = tinytemplate.TinyTemplate(template_file)
@@ -30,3 +34,4 @@ def test_template_variable_evaluation_render():
     print()
     print(output)
     print()
+    assert "Junkai Zhang" in output

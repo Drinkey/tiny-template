@@ -1,6 +1,7 @@
 """Covert Template to Python Code
 """
 import re
+import pathlib
 
 TOKENPATTERN = r"(?s)({{.*?}}|{%.*?%}|{#.*?#})"
 LOGIC = "{%"
@@ -10,6 +11,8 @@ COMMENT = "{#"
 # TODO: this one should be configurable
 INDENT_STEP = 4
 
+# templates/ folder should be same as this file.
+TEMPLATE_DIR = pathlib.Path(__file__).resolve().parent
 
 class CodeBuilder:
     """Generate Python code
@@ -58,8 +61,11 @@ def dummy_function(*args):
 
 
 class TinyTemplate:
-    def __init__(self, tepmplate, *contexts):
-        self.template = tepmplate
+    def __init__(self, template, *contexts):
+        self.template = f'{str(TEMPLATE_DIR)}/templates/{template}'
+        if pathlib.PurePath(template).is_absolute():
+            self.template = template
+        
         self.all_variables = set()
         self.loop_vars = set()
         self.render_code = dummy_function
