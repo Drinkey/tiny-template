@@ -50,12 +50,36 @@ class CodeBuilder:
 
 
 def parser(var, *properties):
+    """Parse x.y, or x.y.z while x is a dict
+
+    The x.y.z is representing the structure of following
+    context = {
+        'x': {
+            'y': {
+                'z': 'hello'
+            }
+        }
+    }
+    return context['x']['y']['z']
+
+    The x.y is representing the structure of following
+    context = {
+        'x': {
+            'y': 'hello'
+        }
+    }
+    return context['x']['y']
+    
+    :param var: the key of a context
+    :type var: str
+    :return: the value propery of var
+    :rtype: Any
+    """
     for prop in properties:
         try:
             var = getattr(var, prop)
         except AttributeError:
             var = var[prop]
-        
     return var
 
 
@@ -99,13 +123,32 @@ class TinyTemplate:
             del buffer[:]
 
         templ_tokens = self._tokenize_templ()
+        ops_stack = list()
         for token in templ_tokens:
             if token.startswith(COMMENT):
                 continue
-            if token.startswith(EXPRESSION):
+            elif token.startswith(EXPRESSION):
                 expr = self._expr_code(token[2:-2].strip())
                 buffer.append(f"to_str({expr})")
                 continue
+            elif token.startswith(LOGIC):
+                flush_output()
+                # FIXME: we only support one condition evaluation
+                op, *expressions = token[2:-2].split()
+                if op == 'if':
+                    if len(expressions) == 0:
+                        raise SyntaxError("Unknown syntax for if expression")
+                    print(f"expressions={expressions}")
+                    expr = self._expr_code(' '.join(expressions))
+                    ops_stack.append('if')
+                    _code.add_line(f"if {expr}:")
+                    _code.indent()
+                elif op == 'for':
+                    flush_output()
+                    raise NotImplementedError
+                elif op.startswith('end'):
+                    print(f'current op stack:{ops_stack}')
+                    _code.dedent()
             else:
                 if token:
                     buffer.append(repr(token))
