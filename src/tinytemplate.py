@@ -49,11 +49,14 @@ class CodeBuilder:
         return code_globals
 
 
-def do_dot(var, prop):
-    try:
-        return var.get(prop)
-    except KeyError:
-        return var[prop]
+def parser(var, *properties):
+    for prop in properties:
+        try:
+            var = getattr(var, prop)
+        except AttributeError:
+            var = var[prop]
+        
+    return var
 
 
 def dummy_function(*args):
@@ -68,6 +71,7 @@ class TinyTemplate:
         
         self.all_variables = set()
         self.loop_vars = set()
+        self.dot_vars = set()
         self.render_code = dummy_function
 
         self.context = dict()
@@ -77,7 +81,7 @@ class TinyTemplate:
     def compiler(self):
         _code = CodeBuilder()
 
-        _code.add_line("def render_code(context):")
+        _code.add_line("def render_code(context, parser):")
         _code.indent()
         vars_code = _code.add_section()
         _code.add_line("result = list()")
@@ -112,8 +116,6 @@ class TinyTemplate:
         _code.add_line("result_str = ''.join(result)")
         _code.add_line("return result_str")
 
-        # code_globals = _code.get_globals()
-        # self.render_code = code_globals['render_code']
         return _code
 
     def _tokenize_templ(self):
@@ -123,13 +125,26 @@ class TinyTemplate:
         return re.split(TOKENPATTERN, content)
 
     def _expr_code(self, expr):
-        self._variables(expr)
-        code = f"c_{expr}"
+        code = ''
+        if '.' in expr:
+            var, *property_ = expr.split('.')
+            code = self._expr_code(var)
+            self._add_dot_variables(code)
+            args = ", ".join(repr(d) for d in property_)
+            code = f"parser(c_{var}, {args})"
+            print(code)
+            print(self.dot_vars)
+        else:
+            self._add_all_variables(expr)
+            code = f"c_{expr}"
         return code
 
-    def _variables(self, var_name):
+    def _add_all_variables(self, var_name):
         # TODO: if var_name is a valid variable name?
         self.all_variables.add(var_name)
+    
+    def _add_dot_variables(self, var_name):
+        self.dot_vars.add(var_name)
 
     def render(self, context=None):
         render_context = self.context
@@ -137,7 +152,8 @@ class TinyTemplate:
             self.context.update(context)
         codeobj = self.compiler()
         source_code = ''.join(str(s) for s in codeobj.code)
+        print(source_code)
         source_code_globals = dict()
         exec(source_code, source_code_globals)
         self.render_code = source_code_globals['render_code']
-        return self.render_code(render_context)
+        return self.render_code(render_context, parser)
