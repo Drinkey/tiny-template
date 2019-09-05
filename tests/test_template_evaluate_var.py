@@ -35,3 +35,39 @@ def test_template_variable_evaluation_render():
     print(output)
     print()
     assert "Junkai Zhang" in output
+
+def test_template_access_properties_with_dots():
+    template_file = f'{str(TEMPLATE_DIR)}/templates/templ_props.html'
+    context = {
+        'user':{
+            'name': 'Clark Kent',
+            'role': 'Justice Leaguage',
+            'alias': 'Super Man'
+        }
+    }
+    templ = tinytemplate.TinyTemplate(template_file)
+    output = templ.render(context)
+    print()
+    print(output)
+    print()
+    for val in context['user'].values():
+        assert val in output
+
+def test_template_access_properties_with_dots_two_dots():
+    template_file = f'{str(TEMPLATE_DIR)}/templates/templ_two_dots_props.html'
+    context = {
+        'user':{
+            'name': 'Clark Kent',
+            'role': 'Justice Leaguage',
+            'alias': 'Super Man',
+            'tags': {
+                'keyword': '#fly,#steel,#hero'
+            }
+        }
+    }
+    templ = tinytemplate.TinyTemplate(template_file)
+    output = templ.render(context)
+    print()
+    print(output)
+    print()
+    assert 'fly' in output
