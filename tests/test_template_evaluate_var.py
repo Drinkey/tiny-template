@@ -118,3 +118,49 @@ def test_template_for_statement():
     assert 'fortress' in output
     assert 'Clark Kent' in output
 
+def test_template_nested_for_if_statement():
+    template_file = f'{str(TEMPLATE_DIR)}/templates/templ_nested_for_if.md'
+    def my_func(s):
+        return f"{s}++"
+    context = {
+        'article': {
+            'title': 'Software Engineering',
+            'author': 'Copy from Internet',
+            'sections': [
+                {
+                    'title': 'History',
+                    'content': "don't know yet",
+                    'has_bullets': False,
+                },
+                {
+                    'title': 'Definition',
+                    'content': "quote from wiki",
+                    'has_bullets': True,
+                    'bullets': [
+                        {
+                            'item': 'use of enginering method'
+                        },{
+                            'item': 'application of engineering'
+                        },{
+                            'item': 'what hell i am saying'
+                        }
+                    ]
+                },{
+                    'title': 'workflow',
+                    'content': 'see the chart',
+                    'has_bullets': False,
+                }
+            ]
+        },
+        'upper': str.upper,
+        'strip': str.strip,
+        'raw': my_func
+    }
+    templ = tinytemplate.TinyTemplate(template_file)
+    output = templ.render(context)
+    print()
+    print(output)
+    print()
+    assert '++' in output
+    assert 'enginering method' in output
+    assert '# Software Engineering'.upper() in output

@@ -117,13 +117,15 @@ class TinyTemplate:
 
         def flush_output():
             if len(buffer) == 1:
-                _code.add_line(f"append_result['{buffer[0]}']")
+                _code.add_line(f"append_result({buffer[0]})")
             elif len(buffer) > 1:
                 _code.add_line(f'extend_result([{", ".join(buffer)}])')
             del buffer[:]
 
         templ_tokens = self._tokenize_templ()
         ops_stack = list()
+
+        # FIXME: handle the damn multiple CRs, current output sucks.
         for token in templ_tokens:
             if token.startswith(COMMENT):
                 continue
@@ -138,31 +140,30 @@ class TinyTemplate:
                 if op == 'if':
                     if len(expressions) == 0:
                         raise SyntaxError(f"Unknown syntax: if expression: `if {' '.join(expressions)}`")
-                    print(f"expressions={expressions}")
                     expr = self._expr_code(' '.join(expressions))
                     ops_stack.append('if')
                     _code.add_line(f"if {expr}:")
                     _code.indent()
+
                 elif op == 'for':
                     if len(expressions) < 3 or expressions[1] != 'in':
                         raise SyntaxError(f"Unknown syntax: for expression: `if {' '.join(expressions)}`")
-                    print(f"expressions={expressions}")
 
                     loop_var, _, iter_var = expressions
                     self._add_loop_variables(loop_var)
-                    # expr = self._expr_code(' '.join(expressions))
+
                     ops_stack.append('for')
                     _code.add_line(f"for c_{loop_var} in {self._expr_code(iter_var)}:")
                     _code.indent()
+
                 elif op.startswith('end'):
-                    end_op = op[3:]
-                    print(f'current op stack:{ops_stack}')
-                    print(f"ending op: {end_op}")
+                    # TODO: end_op = op[3:] need error handling
                     _code.dedent()
             else:
                 if token:
                     buffer.append(repr(token))
         flush_output()
+
         for var_name in self._all_variables - self._loop_variables:
             vars_code.add_line(f'c_{var_name} = context["{var_name}"]')
 
@@ -179,13 +180,18 @@ class TinyTemplate:
 
     def _expr_code(self, expr):
         code = ''
-        if '.' in expr:
+        # `|`` pipes must be parsed before `.` dots parsed due to evaluation order
+        if '|' in expr:
+            var, *funcs = expr.split('|')
+            code = self._expr_code(var)
+            for _func in funcs:
+                self._add_all_variables(_func)
+                code = f"c_{_func}({code})"
+        elif '.' in expr:
             var, *property_ = expr.split('.')
             code = self._expr_code(var)
             args = ", ".join(repr(d) for d in property_)
             code = f"parser(c_{var}, {args})"
-            print(code)
-            print(self.dot_vars)
         else:
             self._add_all_variables(expr)
             code = f"c_{expr}"
