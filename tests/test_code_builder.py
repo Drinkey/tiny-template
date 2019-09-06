@@ -50,7 +50,6 @@ def test_compiler_get_globals():
     for code in codesource.split('\n'):
         codebuilder.add_line(code)
     g = codebuilder.get_globals()
-    print(g)
     assert 'var1' in g and g['var1'] == 123
     assert 'func_1' in g
     assert 'var_str' in g and g['var_str'] == 'unittest'
