@@ -49,6 +49,13 @@ class CodeBuilder:
         return code_globals
 
 
+def parse_template_file(template):
+    content = ''
+    with open(template) as fp:
+        content = fp.read()
+    return re.split(TOKENPATTERN, content)
+
+
 def parser(var, *properties):
     """Parse x.y, or x.y.z while x is a dict
 
@@ -92,15 +99,13 @@ class TinyTemplate:
         self.template = f'{str(TEMPLATE_DIR)}/templates/{template}'
         if pathlib.PurePath(template).is_absolute():
             self.template = template
-        
-        self._all_variables = set()
-        self._loop_variables = set()
-        self.dot_vars = set()
+
+        # Cheat the linters
         self.render_code = dummy_function
 
         self.context = dict()
-        for context in contexts:
-            self.context.update(context)
+        self._all_variables = set()
+        self._loop_variables = set()
 
     def compiler(self):
         _code = CodeBuilder()
@@ -122,7 +127,7 @@ class TinyTemplate:
                 _code.add_line(f'extend_result([{", ".join(buffer)}])')
             del buffer[:]
 
-        templ_tokens = self._tokenize_templ()
+        templ_tokens = parse_template_file(self.template)
         ops_stack = list()
 
         # FIXME: handle the damn multiple CRs, current output sucks.
@@ -172,11 +177,7 @@ class TinyTemplate:
 
         return _code
 
-    def _tokenize_templ(self):
-        content = ''
-        with open(self.template) as fp:
-            content = fp.read()
-        return re.split(TOKENPATTERN, content)
+    
 
     def _expr_code(self, expr):
         code = ''
