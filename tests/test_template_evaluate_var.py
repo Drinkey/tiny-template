@@ -6,10 +6,9 @@ TEMPLATE_DIR = pathlib.Path(__file__).resolve().parent
 
 def test_template_s_tokenize_templ():
     template_file = f'{str(TEMPLATE_DIR)}/templates/templ_var_eval.html'
-    templ = tinytemplate.TinyTemplate(template_file)
-    output = templ._tokenize_templ()
-    print(output)
-    assert "{{ user_name }}" in output and isinstance(output, list)
+    templ = tinytemplate.parse_template_file(template_file)
+    print(templ)
+    assert "{{ user_name }}" in templ and isinstance(templ, list)
 
 
 def test_template_variable_evaluation_compiler():
