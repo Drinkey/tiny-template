@@ -49,6 +49,13 @@ class CodeBuilder:
         return code_globals
 
 
+def parse_template_file(template):
+    content = ''
+    with open(template) as fp:
+        content = fp.read()
+    return re.split(TOKENPATTERN, content)
+
+
 def parser(var, *properties):
     """Parse x.y, or x.y.z while x is a dict
 
@@ -92,15 +99,13 @@ class TinyTemplate:
         self.template = f'{str(TEMPLATE_DIR)}/templates/{template}'
         if pathlib.PurePath(template).is_absolute():
             self.template = template
-        
-        self._all_variables = set()
-        self._loop_variables = set()
-        self.dot_vars = set()
+
+        # Cheat the linters
         self.render_code = dummy_function
 
         self.context = dict()
-        for context in contexts:
-            self.context.update(context)
+        self._all_variables = set()
+        self._loop_variables = set()
 
     def compiler(self):
         _code = CodeBuilder()
@@ -122,20 +127,24 @@ class TinyTemplate:
                 _code.add_line(f'extend_result([{", ".join(buffer)}])')
             del buffer[:]
 
-        templ_tokens = self._tokenize_templ()
+        templ_tokens = parse_template_file(self.template)
         ops_stack = list()
 
         # FIXME: handle the damn multiple CRs, current output sucks.
         for token in templ_tokens:
+            # Ignore comment lines
             if token.startswith(COMMENT):
                 continue
+            # Processing expression lines starting with {{
             elif token.startswith(EXPRESSION):
                 expr = self._expr_code(token[2:-2].strip())
                 buffer.append(f"to_str({expr})")
                 continue
+            # Processing logic control statement
             elif token.startswith(LOGIC):
                 flush_output()
                 # FIXME: we only support one condition evaluation
+                # Extract statement first, [2:-2] to strip {%...%} marker
                 op, *expressions = token[2:-2].split()
                 if op == 'if':
                     if len(expressions) == 0:
@@ -146,6 +155,7 @@ class TinyTemplate:
                     _code.indent()
 
                 elif op == 'for':
+                    # for loop should be `for x in y`
                     if len(expressions) < 3 or expressions[1] != 'in':
                         raise SyntaxError(f"Unknown syntax: for expression: `if {' '.join(expressions)}`")
 
@@ -171,12 +181,6 @@ class TinyTemplate:
         _code.add_line("return result_str")
 
         return _code
-
-    def _tokenize_templ(self):
-        content = ''
-        with open(self.template) as fp:
-            content = fp.read()
-        return re.split(TOKENPATTERN, content)
 
     def _expr_code(self, expr):
         code = ''
