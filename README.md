@@ -55,3 +55,145 @@ output = render(templ, user_name, product_list)
 # Principles
 
 Write test first, develop code later
+
+# Analysis
+
+The implementation is compiling engine, which means it will generate python code to finally outputs the result.
+
+## Proof of Concept
+
+for example, in file `tests/proof_of_concept.py`
+
+### POC Template
+
+Here is the template defined in `templ_str`, we don't use it actually, we just want to show how the template file looks like.
+
+```markdown
+# {{title}}
+
+> {{author_name}}
+
+{% for section in content %}
+
+## {{section.header|to_str}}
+
+{{section.content}}
+{% endfor %}
+
+```
+
+We want to display the `title` and `author_name` at first, then display each section defined in the `content` strusture. For each section, we want to display its `title` as level 2 header, and the content.
+
+### POC Render Result
+
+The rendered output will look like following
+
+```markdown
+# Software Engineering
+
+> Junkai Zhang
+
+## Definition
+
+develop a software
+- option 1
+- option 2
+
+## Engineering Method
+
+do a job
+
+## Workflow
+
+show a chart
+
+tags: #software, #engineering, #SDLC
+```
+
+### POC Content Data
+While the content data is like the following:
+
+```python
+context = {
+    'title': 'Software Engineering',
+    'author_name': 'Junkai Zhang',
+    'content': [
+        {
+            'header': 'Definition',
+            'content': 'develop a software\n- option 1\n- option 2'
+        },
+        {
+            'header': 'Engineering Method',
+            'content': "do a job"
+        },
+        {
+            'header': 'Workflow',
+            'content': 'show a chart'
+        }
+    ],
+    'formater': int
+}
+```
+
+### POC Code to output rendered result
+
+To generate the rendered output, we have following code to process it.
+
+```python
+def test_variable_evaluation():
+    result = list()
+
+    extend_result = result.extend
+    append_result = result.append
+    to_str = str
+    extend_result([
+        '# ',
+        context['title'],
+        '\n\n',
+        '> ',
+        to_str(context['author_name']),
+        '\n\n',
+    ])
+
+    for head in context['content']:
+        extend_result([
+            '## ',
+            to_str(do_dot(head, 'header')),
+            '\n\n',
+            to_str(do_dot(head, 'content')),
+            '\n\n'
+        ])
+
+    append_result('tags: #software, #engineering, #SDLC')
+
+    result_str = ''.join(result)
+    print(result)
+```
+
+Finally, we have the output we want show in [POC Render Result](#POC-Render-Result)
+
+> Note, to see the result by yourself, run `pytest -s -vv tests/proof_of_concept.py`
+
+## Design
+
+So, our big goal now changed from "implement a template engine" to "generate python code".
+
+Take a closer look at the code, some of lines are fixed so we have less content to worry about.
+
+```python
+def test_variable_evaluation():
+    result = list()
+    # <<< May need some variables definition here!! >>>
+    extend_result = result.extend
+    append_result = result.append
+    to_str = str
+    # 
+    # Here is the changing part!!
+    #
+    result_str = ''.join(result)
+    print(result)
+```
+
+The two comment area is what we need to work on. So, our work is become generate Python code lines marked in the above area.
+
+

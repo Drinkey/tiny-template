@@ -1,5 +1,3 @@
-import pytest
-
 
 def read_template(templ_file):
     content = ''
@@ -52,8 +50,6 @@ templ_str = """
 
 
 def test_variable_evaluation():
-    template_file = './templates/templ_var_eval.html'
-    user_name = "Junkai Zhang"
     result = list()
 
     extend_result = result.extend
@@ -83,15 +79,3 @@ def test_variable_evaluation():
     print(result)
     print(result_str)
     assert "Junkai" in result_str
-
-    # if token.startswith(LOGIC):
-    #             flush_output()
-    #             words = token[2:-2].strip().split()
-    #             if words[0] == 'if':
-    #                 # if statements, make sure the syntax is correct first
-    #                 if len(words) < 2:
-    #                     raise SyntaxError("If Statement should have conditions")
-    #                 ops_stack.append('if')
-    #                 self.code.addline(f'if {" ".join(words[1:])}:')
-    #                 self.code.indent()
-    

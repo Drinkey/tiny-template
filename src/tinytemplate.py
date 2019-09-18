@@ -132,15 +132,19 @@ class TinyTemplate:
 
         # FIXME: handle the damn multiple CRs, current output sucks.
         for token in templ_tokens:
+            # Ignore comment lines
             if token.startswith(COMMENT):
                 continue
+            # Processing expression lines starting with {{
             elif token.startswith(EXPRESSION):
                 expr = self._expr_code(token[2:-2].strip())
                 buffer.append(f"to_str({expr})")
                 continue
+            # Processing logic control statement
             elif token.startswith(LOGIC):
                 flush_output()
                 # FIXME: we only support one condition evaluation
+                # Extract statement first, [2:-2] to strip {%...%} marker
                 op, *expressions = token[2:-2].split()
                 if op == 'if':
                     if len(expressions) == 0:
@@ -151,6 +155,7 @@ class TinyTemplate:
                     _code.indent()
 
                 elif op == 'for':
+                    # for loop should be `for x in y`
                     if len(expressions) < 3 or expressions[1] != 'in':
                         raise SyntaxError(f"Unknown syntax: for expression: `if {' '.join(expressions)}`")
 
@@ -176,8 +181,6 @@ class TinyTemplate:
         _code.add_line("return result_str")
 
         return _code
-
-    
 
     def _expr_code(self, expr):
         code = ''
