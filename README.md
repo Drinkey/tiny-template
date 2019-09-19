@@ -60,6 +60,10 @@ Write test first, develop code later
 
 The implementation is compiling engine, which means it will generate python code to finally outputs the result.
 
+## Flowchart to show the process
+
+![flowchart](template-engine.png)
+
 ## Proof of Concept
 
 for example, in file `tests/proof_of_concept.py`
