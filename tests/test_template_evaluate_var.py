@@ -15,7 +15,7 @@ def test_template_variable_evaluation_compiler():
     template_file = f'{str(TEMPLATE_DIR)}/templates/templ_var_eval.html'
     # user_name = "Junkai Zhang"
     templ = tinytemplate.TinyTemplate(template_file)
-    output = templ.compiler()
+    output = templ._compile_to_pycode()
     output_str = ''.join(str(s) for s in output.code)
     print()
     print(output_str)
