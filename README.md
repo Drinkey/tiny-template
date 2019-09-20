@@ -50,7 +50,7 @@ output = render(templ, user_name, product_list)
 4. `[DONE]` Support `for` statement
 5. `[DONE]` Support nested `for` and `if` statements
 6. `[DONE]` Support filters with pipes, multiple pipes
-7. **[TODO]** Refactoring all codes
+7. `[DONE]` Refactoring all codes
 
 # Principles
 
@@ -199,5 +199,3 @@ def test_variable_evaluation():
 ```
 
 The two comment area is what we need to work on. So, our work is become generate Python code lines marked in the above area.
-
-

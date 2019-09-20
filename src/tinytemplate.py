@@ -134,7 +134,7 @@ class TinyTemplate:
         for var_name in self._all_variables - self._loop_variables:
             self._vars_code.add_line(f'c_{var_name} = context["{var_name}"]')
 
-    def flush_output(self):
+    def flush_buffer(self):
         if len(self._buffer) == 1:
             self._code.add_line(f"append_result({self._buffer[0]})")
         elif len(self._buffer) > 1:
@@ -154,14 +154,14 @@ class TinyTemplate:
             else:
                 if token:
                     self._buffer.append(repr(token))
-        self.flush_output()
+        self.flush_buffer()
 
     def _handling_variable_evaluation(self, token):
         stmt_code = self._generate_statement_code(token[2:-2].strip())
         self._buffer.append(f"to_str({stmt_code})")
 
     def _handling_logic_control_statements(self, token):
-        self.flush_output()
+        self.flush_buffer()
         # FIXME: we only support one condition evaluation
         # Extract statement first, [2:-2] to strip {%...%} marker
         op, *expressions = token[2:-2].split()
